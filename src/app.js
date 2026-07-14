@@ -1,30 +1,11 @@
-import { ServiceManager } from './managers/ServiceManager.js';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import express from 'express';
+import servicesRouter from './routes/services.router.js';
 
+const app = express();
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const rutaDeDatos = path.join(__dirname, './data/services.json');
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
+app.use('/api/services', servicesRouter);
 
-const manager = new ServiceManager(rutaDeDatos);
-
-
-const test = async () => {
-    console.log("Agregando servicio de viaje...");
-    
-   
-    await manager.addService({ 
-        name: "Tour por Europa", 
-        description: "Recorrido por París, Roma y Madrid", 
-        duration: 15, 
-        price: 2500, 
-        category: "Tours Internacionales", 
-        available: true 
-    });
-    
-    const servicios = await manager.getServices();
-    console.log("Servicios de viaje actuales:", servicios);
-};
-
-test();
+export default app;
