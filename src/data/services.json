@@ -1,50 +1,5 @@
 [
   {
-    "id": 1784059166459,
-    "name": "Corte de pelo",
-    "description": "Servicio básico",
-    "duration": 30,
-    "price": 500,
-    "category": "Estética",
-    "available": true
-  },
-  {
-    "id": 1784059172534,
-    "name": "Corte de pelo",
-    "description": "Servicio premium",
-    "duration": 45,
-    "price": 1500,
-    "category": "Estética",
-    "available": true
-  },
-  {
-    "id": 1784059294360,
-    "name": "Corte de pelo",
-    "description": "Servicio básico",
-    "duration": 30,
-    "price": 500,
-    "category": "Estética",
-    "available": true
-  },
-  {
-    "id": 1784059301650,
-    "name": "Corte de pelo",
-    "description": "Servicio básico",
-    "duration": 30,
-    "price": 500,
-    "category": "Estética",
-    "available": true
-  },
-  {
-    "id": 1784059305461,
-    "name": "Corte de pelo",
-    "description": "Servicio básico",
-    "duration": 30,
-    "price": 500,
-    "category": "Estética",
-    "available": true
-  },
-  {
     "id": 1784059419240,
     "name": "Tour por Europa",
     "description": "Recorrido por París, Roma y Madrid",
