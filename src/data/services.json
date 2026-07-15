@@ -7,5 +7,14 @@
     "price": 2500,
     "category": "Tours Internacionales",
     "available": true
+  },
+  {
+    "id": 1784067575544,
+    "name": "Excursión a Cardal",
+    "description": "Visita turística a la capital lechera del Uruguay con almuerzo incluido",
+    "duration": 8,
+    "price": 1500,
+    "category": "turismo",
+    "available": true
   }
 ]
