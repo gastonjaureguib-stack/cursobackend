@@ -1,23 +1,16 @@
 import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
+dotenv.config();
 
+const requiredEnv = ['PORT', 'NODE_ENV'];
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+requiredEnv.forEach((key) => {
+    if (!process.env[key]) {
+        console.error(`Error: La variable de entorno '${key}' es obligatoria.`);
+        process.exit(1); 
+    }
+});
 
 export const envConfig = {
     PORT: process.env.PORT,
-    NODE_ENV: process.env.NODE_ENV,
+    NODE_ENV: process.env.NODE_ENV
 };
-
-if (!envConfig.PORT) {
-    console.error("❌ ERROR: La variable PORT no está definida en el archivo .env");
-    console.error("Asegúrate de que el archivo .env esté en la raíz del proyecto.");
-    process.exit(1);
-}
-
-console.log("✅ Variables de entorno cargadas correctamente.");
