@@ -1,10 +1,10 @@
-# Agencia de Viajes - API Backend
+# Sistema Backend de Servicios y Reservas
 
-API desarrollada en Node.js para administrar servicios turísticos utilizando FileSystem como almacenamiento persistente.
+API REST desarrollada con **Node.js**, **Express** y **FileSystem** para administrar servicios turísticos y reservas. La información se almacena de forma persistente en archivos JSON, por lo que los datos se conservan aunque el servidor se reinicie.
 
 ---
 
-## Tecnologías utilizadas
+# Tecnologías utilizadas
 
 - Node.js
 - Express
@@ -13,21 +13,31 @@ API desarrollada en Node.js para administrar servicios turísticos utilizando Fi
 
 ---
 
-## Instalación
+# Instalación
 
-1. Clonar el repositorio.
+1. Clonar el repositorio:
 
-2. Instalar las dependencias:
+```bash
+git clone https://github.com/usuario/repositorio.git
+```
+
+2. Ingresar al proyecto:
+
+```bash
+cd cursoback
+```
+
+3. Instalar las dependencias:
 
 ```bash
 npm install
 ```
 
-3. Crear un archivo `.env` tomando como referencia `.env.example`.
+4. Crear un archivo `.env` tomando como referencia `.env.example`.
 
 ---
 
-## Variables de entorno
+# Variables de entorno
 
 El proyecto requiere las siguientes variables:
 
@@ -36,11 +46,11 @@ PORT=8080
 NODE_ENV=development
 ```
 
-En el repositorio únicamente se incluye `.env.example`.
+En el repositorio se incluye un archivo `.env.example` como referencia.
 
 ---
 
-## Ejecución
+# Ejecución
 
 Modo desarrollo:
 
@@ -48,11 +58,56 @@ Modo desarrollo:
 npm run dev
 ```
 
-Modo normal:
+Modo producción:
 
 ```bash
 npm start
 ```
+
+Por defecto el servidor se ejecuta en:
+
+```
+http://localhost:8080
+```
+
+---
+
+# Estructura del proyecto
+
+```
+src/
+│
+├── app.js
+├── server.js
+│
+├── config/
+│   └── env.config.js
+│
+├── data/
+│   ├── services.json
+│   └── bookings.json
+│
+├── managers/
+│   ├── ServiceManager.js
+│   └── BookingManager.js
+│
+└── routes/
+    ├── services.router.js
+    └── bookings.router.js
+```
+
+---
+
+# Persistencia
+
+La aplicación utiliza **FileSystem** para almacenar la información en archivos JSON.
+
+Archivos utilizados:
+
+- `src/data/services.json`
+- `src/data/bookings.json`
+
+Los datos permanecen almacenados incluso después de reiniciar el servidor.
 
 ---
 
@@ -67,44 +122,40 @@ Cada servicio posee la siguiente estructura:
   "description": "Excursión guiada",
   "duration": 4,
   "price": 50,
-  "category": "aventura",
+  "category": "Aventura",
   "available": true
 }
 ```
 
----
+## Endpoints
 
-# Métodos disponibles
+### Obtener todos los servicios
 
-## getServices()
-
-Obtiene todos los servicios registrados.
-
-### Ejemplo
-
-```javascript
-const services = await manager.getServices();
+```
+GET /api/services
 ```
 
+Devuelve todos los servicios registrados.
+
 ---
 
-## getServiceById(id)
+### Obtener un servicio por ID
 
-Obtiene un servicio según su ID.
-
-### Ejemplo
-
-```javascript
-const service = await manager.getServiceById(1);
+```
+GET /api/services/:sid
 ```
 
+Devuelve un servicio específico.
+
 ---
 
-## addService(serviceData)
+### Crear un servicio
 
-Agrega un nuevo servicio.
+```
+POST /api/services
+```
 
-El ID se genera automáticamente y valida los siguientes campos obligatorios:
+Campos requeridos:
 
 - name
 - description
@@ -113,44 +164,129 @@ El ID se genera automáticamente y valida los siguientes campos obligatorios:
 - category
 - available
 
-### Ejemplo
-
-```javascript
-await manager.addService({
-    name: "City Tour",
-    description: "Recorrido por la ciudad",
-    duration: 2,
-    price: 30,
-    category: "Turismo",
-    available: true
-});
-```
+El ID se genera automáticamente.
 
 ---
 
-## updateService(id, updatedData)
+### Actualizar un servicio
+
+```
+PUT /api/services/:sid
+```
 
 Actualiza un servicio existente.
 
-No permite modificar el ID.
+**El ID no puede modificarse.**
 
-### Ejemplo
+---
 
-```javascript
-await manager.updateService(1, {
-    price: 40,
-    available: false
-});
+### Eliminar un servicio
+
+```
+DELETE /api/services/:sid
+```
+
+Elimina un servicio existente.
+
+---
+
+# Recurso: Bookings
+
+Cada reserva posee la siguiente estructura:
+
+```json
+{
+  "id": 1721484000000,
+  "clientName": "Juan Pérez",
+  "clientEmail": "juan@mail.com",
+  "date": "2026-07-20",
+  "time": "15:00",
+  "status": "pending",
+  "services": [
+    {
+      "service": 1721483000000,
+      "quantity": 1
+    }
+  ]
+}
 ```
 
 ---
 
-## deleteService(id)
+## Endpoints
 
-Elimina un servicio por su ID.
+### Crear una reserva
 
-### Ejemplo
-
-```javascript
-await manager.deleteService(1);
 ```
+POST /api/bookings
+```
+
+Crea una nueva reserva.
+
+Puede iniciarse con el arreglo `services` vacío.
+
+---
+
+### Obtener una reserva por ID
+
+```
+GET /api/bookings/:bid
+```
+
+Devuelve una reserva específica.
+
+---
+
+### Agregar un servicio a una reserva
+
+```
+POST /api/bookings/:bid/services/:sid
+```
+
+Agrega un servicio existente a una reserva existente.
+
+Si el mismo servicio se agrega nuevamente, no se crea un nuevo registro; simplemente se incrementa la propiedad `quantity`.
+
+---
+
+# Validaciones implementadas
+
+La API valida:
+
+- Campos obligatorios.
+- Tipos de datos.
+- Formato válido del correo electrónico.
+- Formato de fecha.
+- Formato de hora.
+- Estados permitidos para una reserva.
+- El ID se genera automáticamente.
+- El ID no puede modificarse durante una actualización.
+
+---
+
+# Scripts disponibles
+
+Ejecutar en modo desarrollo:
+
+```bash
+npm run dev
+```
+
+Ejecutar normalmente:
+
+```bash
+npm start
+```
+
+---
+
+# Dependencias
+
+- express
+- dotenv
+
+---
+
+# Autor
+
+Proyecto desarrollado como entrega para el curso de **Backend con Node.js y Express**, implementando una API REST con persistencia mediante FileSystem.
