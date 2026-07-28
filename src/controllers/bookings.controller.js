@@ -1,11 +1,8 @@
-import { BookingManager } from '../managers/BookingManager.js';
-import { ServiceManager } from '../managers/ServiceManager.js';
+import { BookingsService } from '../services/bookings.service.js';
 
-const manager = new BookingManager('./src/data/bookings.json');
-const serviceManager = new ServiceManager('./src/data/services.json');
+const service = new BookingsService();
 
 export const createBooking = async (req, res) => {
-
     const {
         clientName,
         clientEmail,
@@ -28,8 +25,7 @@ export const createBooking = async (req, res) => {
     }
 
     try {
-
-        const newBooking = await manager.createBooking(req.body);
+        const newBooking = await service.createBooking(req.body);
 
         res.status(201).json({
             status: 'success',
@@ -37,29 +33,22 @@ export const createBooking = async (req, res) => {
         });
 
     } catch (error) {
-
         res.status(500).json({
             status: 'error',
-            message: 'Error al crear la reserva'
+            message: error.message
         });
-
     }
-
 };
 
 export const getBookingById = async (req, res) => {
-
     try {
-
-        const booking = await manager.getBookingById(req.params.bid);
+        const booking = await service.getBookingById(req.params.bid);
 
         if (!booking) {
-
             return res.status(404).json({
                 status: 'error',
                 message: 'Reserva no encontrada'
             });
-
         }
 
         res.status(200).json({
@@ -68,43 +57,16 @@ export const getBookingById = async (req, res) => {
         });
 
     } catch (error) {
-
         res.status(500).json({
             status: 'error',
-            message: 'Error interno del servidor'
+            message: error.message
         });
-
     }
-
 };
 
 export const addServiceToBooking = async (req, res) => {
-
     try {
-
-        const booking = await manager.getBookingById(req.params.bid);
-
-        if (!booking) {
-
-            return res.status(404).json({
-                status: 'error',
-                message: 'Reserva no encontrada'
-            });
-
-        }
-
-        const service = await serviceManager.getServiceById(req.params.sid);
-
-        if (!service) {
-
-            return res.status(404).json({
-                status: 'error',
-                message: 'Servicio no encontrado'
-            });
-
-        }
-
-        const updatedBooking = await manager.addServiceToBooking(
+        const updatedBooking = await service.addServiceToBooking(
             req.params.bid,
             req.params.sid
         );
@@ -115,12 +77,19 @@ export const addServiceToBooking = async (req, res) => {
         });
 
     } catch (error) {
+        if (
+            error.message === 'Reserva no encontrada' ||
+            error.message === 'Servicio no encontrado'
+        ) {
+            return res.status(404).json({
+                status: 'error',
+                message: error.message
+            });
+        }
 
         res.status(500).json({
             status: 'error',
-            message: 'Error al agregar servicio'
+            message: error.message
         });
-
     }
-
 };

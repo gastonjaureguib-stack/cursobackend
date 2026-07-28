@@ -1,6 +1,8 @@
 # Sistema Backend de Servicios y Reservas
 
-API REST desarrollada con **Node.js**, **Express** y **FileSystem** para administrar servicios turísticos y reservas. La información se almacena de forma persistente en archivos JSON, por lo que los datos se conservan aunque el servidor se reinicie.
+API REST desarrollada con **Node.js**, **Express** y **FileSystem**, que permite administrar servicios turísticos y reservas.
+
+La aplicación implementa una **arquitectura en capas** (Router → Controller → Service → Repository → DAO), facilitando el mantenimiento del código y permitiendo reemplazar fácilmente la capa de persistencia en futuras versiones (por ejemplo, migrando de archivos JSON a MongoDB).
 
 ---
 
@@ -15,60 +17,91 @@ API REST desarrollada con **Node.js**, **Express** y **FileSystem** para adminis
 
 # Instalación
 
-1. Clonar el repositorio:
+## 1. Clonar el repositorio
 
 ```bash
 git clone https://github.com/usuario/repositorio.git
 ```
 
-2. Ingresar al proyecto:
+## 2. Ingresar al proyecto
 
 ```bash
 cd cursoback
 ```
 
-3. Instalar las dependencias:
+## 3. Instalar dependencias
 
 ```bash
 npm install
 ```
 
-4. Crear un archivo `.env` tomando como referencia `.env.example`.
+## 4. Crear el archivo `.env`
 
----
+Tomar como referencia el archivo `.env.example`.
 
-# Variables de entorno
-
-El proyecto requiere las siguientes variables:
+Ejemplo:
 
 ```env
 PORT=8080
 NODE_ENV=development
 ```
 
-En el repositorio se incluye un archivo `.env.example` como referencia.
-
 ---
 
 # Ejecución
 
-Modo desarrollo:
+### Modo desarrollo
 
 ```bash
 npm run dev
 ```
 
-Modo producción:
+### Modo producción
 
 ```bash
 npm start
 ```
 
-Por defecto el servidor se ejecuta en:
+El servidor se ejecutará por defecto en:
 
 ```
 http://localhost:8080
 ```
+
+---
+
+# Arquitectura del proyecto
+
+La aplicación fue refactorizada siguiendo una **arquitectura en capas**, donde cada una posee una responsabilidad específica.
+
+```
+Router
+   │
+   ▼
+Controller
+   │
+   ▼
+Service
+   │
+   ▼
+Repository
+   │
+   ▼
+DAO
+   │
+   ▼
+Archivo JSON
+```
+
+## Responsabilidad de cada capa
+
+| Capa | Responsabilidad |
+|-------|-----------------|
+| Router | Define los endpoints y delega el procesamiento al Controller. |
+| Controller | Recibe las solicitudes HTTP, obtiene los datos del `req`, invoca al Service y devuelve la respuesta (`res`). |
+| Service | Contiene toda la lógica de negocio y las validaciones de la aplicación. |
+| Repository | Actúa como intermediario entre el Service y el DAO. |
+| DAO | Se encarga exclusivamente de leer y escribir los archivos JSON. |
 
 ---
 
@@ -83,24 +116,36 @@ src/
 ├── config/
 │   └── env.config.js
 │
-├── data/
-│   ├── services.json
-│   └── bookings.json
+├── controllers/
+│   ├── services.controller.js
+│   └── bookings.controller.js
 │
-├── managers/
-│   ├── ServiceManager.js
-│   └── BookingManager.js
+├── services/
+│   ├── services.service.js
+│   └── bookings.service.js
 │
-└── routes/
-    ├── services.router.js
-    └── bookings.router.js
+├── repositories/
+│   ├── services.repository.js
+│   └── bookings.repository.js
+│
+├── dao/
+│   ├── services.dao.js
+│   └── bookings.dao.js
+│
+├── routes/
+│   ├── services.router.js
+│   └── bookings.router.js
+│
+└── data/
+    ├── services.json
+    └── bookings.json
 ```
 
 ---
 
 # Persistencia
 
-La aplicación utiliza **FileSystem** para almacenar la información en archivos JSON.
+La aplicación utiliza **FileSystem** mediante la capa **DAO** para almacenar la información de forma persistente.
 
 Archivos utilizados:
 
@@ -113,7 +158,7 @@ Los datos permanecen almacenados incluso después de reiniciar el servidor.
 
 # Recurso: Services
 
-Cada servicio posee la siguiente estructura:
+## Estructura
 
 ```json
 {
@@ -129,70 +174,19 @@ Cada servicio posee la siguiente estructura:
 
 ## Endpoints
 
-### Obtener todos los servicios
-
-```
-GET /api/services
-```
-
-Devuelve todos los servicios registrados.
-
----
-
-### Obtener un servicio por ID
-
-```
-GET /api/services/:sid
-```
-
-Devuelve un servicio específico.
-
----
-
-### Crear un servicio
-
-```
-POST /api/services
-```
-
-Campos requeridos:
-
-- name
-- description
-- duration
-- price
-- category
-- available
-
-El ID se genera automáticamente.
-
----
-
-### Actualizar un servicio
-
-```
-PUT /api/services/:sid
-```
-
-Actualiza un servicio existente.
-
-**El ID no puede modificarse.**
-
----
-
-### Eliminar un servicio
-
-```
-DELETE /api/services/:sid
-```
-
-Elimina un servicio existente.
+| Método | Endpoint | Descripción |
+|---------|----------|-------------|
+| GET | `/api/services` | Obtener todos los servicios |
+| GET | `/api/services/:sid` | Obtener un servicio por ID |
+| POST | `/api/services` | Crear un nuevo servicio |
+| PUT | `/api/services/:sid` | Actualizar un servicio |
+| DELETE | `/api/services/:sid` | Eliminar un servicio |
 
 ---
 
 # Recurso: Bookings
 
-Cada reserva posee la siguiente estructura:
+## Estructura
 
 ```json
 {
@@ -211,56 +205,26 @@ Cada reserva posee la siguiente estructura:
 }
 ```
 
----
-
 ## Endpoints
 
-### Crear una reserva
-
-```
-POST /api/bookings
-```
-
-Crea una nueva reserva.
-
-Puede iniciarse con el arreglo `services` vacío.
+| Método | Endpoint | Descripción |
+|---------|----------|-------------|
+| POST | `/api/bookings` | Crear una reserva |
+| GET | `/api/bookings/:bid` | Obtener una reserva por ID |
+| POST | `/api/bookings/:bid/services/:sid` | Agregar un servicio a una reserva |
 
 ---
 
-### Obtener una reserva por ID
+# Regla de negocio implementada
 
-```
-GET /api/bookings/:bid
-```
+La lógica principal del sistema se encuentra en la capa **Service**.
 
-Devuelve una reserva específica.
+Cuando un servicio se agrega a una reserva:
 
----
+- Si el servicio **no existe** en la reserva, se agrega con `quantity: 1`.
+- Si el servicio **ya existe**, **no se crea un nuevo registro**, sino que se incrementa automáticamente la propiedad `quantity`.
 
-### Agregar un servicio a una reserva
-
-```
-POST /api/bookings/:bid/services/:sid
-```
-
-Agrega un servicio existente a una reserva existente.
-
-Si el mismo servicio se agrega nuevamente, no se crea un nuevo registro; simplemente se incrementa la propiedad `quantity`.
-
----
-
-# Validaciones implementadas
-
-La API valida:
-
-- Campos obligatorios.
-- Tipos de datos.
-- Formato válido del correo electrónico.
-- Formato de fecha.
-- Formato de hora.
-- Estados permitidos para una reserva.
-- El ID se genera automáticamente.
-- El ID no puede modificarse durante una actualización.
+Esta regla de negocio se implementa en `bookings.service.js`, respetando la arquitectura en capas.
 
 ---
 
@@ -289,4 +253,6 @@ npm start
 
 # Autor
 
-Proyecto desarrollado como entrega para el curso de **Backend con Node.js y Express**, implementando una API REST con persistencia mediante FileSystem.
+**Gastón Jaureguiberry**
+
+Proyecto desarrollado como entrega del curso **Backend con Node.js y Express** de **Coderhouse**, implementando una API REST con arquitectura en capas, patrón Repository, patrón DAO y persistencia mediante FileSystem.
