@@ -4,7 +4,7 @@ const service = new BookingsService();
 
 export const createBooking = async (req, res) => {
     const {
-        clientName,
+        client,
         clientEmail,
         date,
         time,
@@ -12,7 +12,7 @@ export const createBooking = async (req, res) => {
     } = req.body;
 
     if (
-        !clientName ||
+        !client ||
         !clientEmail ||
         !date ||
         !time ||
@@ -83,7 +83,7 @@ export const addServiceToBooking = async (req, res) => {
         ) {
             return res.status(404).json({
                 status: 'error',
-                message: error.message
+                message: 'Reserva no encontrada'
             });
         }
 

@@ -12,7 +12,9 @@ const router = Router();
 
 router.get('/', getServices);
 
+
 router.get('/:sid', getServiceById);
+router.get('/getById/:sid', getServiceById);
 
 router.post('/', createService);
 

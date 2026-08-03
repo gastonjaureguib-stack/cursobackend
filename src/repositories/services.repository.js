@@ -1,6 +1,6 @@
 import { ServicesDAO } from '../dao/services.dao.js';
 
-const dao = new ServicesDAO('./src/data/services.json');
+const dao = new ServicesDAO();
 
 export class ServicesRepository {
 

@@ -1,85 +1,44 @@
-import fs from 'fs/promises';
+import { BookingModel } from '../models/booking.model.js';
 
 export class BookingsDAO {
 
-    constructor(filePath) {
-        this.path = filePath;
-    }
-
-    async #readFile() {
-
-        try {
-
-            const data = await fs.readFile(this.path, 'utf-8');
-
-            if (!data.trim()) {
-                return [];
-            }
-
-            return JSON.parse(data);
-
-        } catch (error) {
-
-            if (error.code === 'ENOENT') {
-                return [];
-            }
-
-            throw new Error('El archivo de datos está corrupto o tiene un formato inválido.');
-
-        }
-
-    }
-
     async getAll() {
-        return await this.#readFile();
+        try {
+            return await BookingModel.find().populate('services.service');
+        } catch (error) {
+            throw new Error(`Error al obtener las reservas: ${error.message}`);
+        }
     }
 
     async getById(id) {
-
-        const bookings = await this.getAll();
-
-        return bookings.find(
-            booking => booking.id === Number(id)
-        ) || null;
-
+        try {
+            return await BookingModel.findById(id).populate('services.service');
+        } catch (error) {
+            return null; // Si el ID no es un ObjectId válido o no existe
+        }
     }
 
     async create(newBooking) {
-
-        const bookings = await this.getAll();
-
-        bookings.push(newBooking);
-
-        await fs.writeFile(
-            this.path,
-            JSON.stringify(bookings, null, 2)
-        );
-
-        return newBooking;
-
+        try {
+            const booking = await BookingModel.create(newBooking);
+            return await booking.populate('services.service');
+        } catch (error) {
+            throw new Error(`Error al crear la reserva: ${error.message}`);
+        }
     }
 
     async update(id, updatedBooking) {
+        try {
+            const booking = await BookingModel.findByIdAndUpdate(
+                id,
+                updatedBooking,
+                { new: true, runValidators: true }
+            ).populate('services.service');
 
-        const bookings = await this.getAll();
-
-        const index = bookings.findIndex(
-            booking => booking.id === Number(id)
-        );
-
-        if (index === -1) {
+            return booking;
+        } catch (error) {
             return null;
         }
-
-        bookings[index] = updatedBooking;
-
-        await fs.writeFile(
-            this.path,
-            JSON.stringify(bookings, null, 2)
-        );
-
-        return updatedBooking;
-
     }
 
 }

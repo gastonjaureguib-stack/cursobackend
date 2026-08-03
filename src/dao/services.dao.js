@@ -1,78 +1,49 @@
-import fs from 'fs/promises';
+import { ServiceModel } from '../models/service.model.js';
 
 export class ServicesDAO {
 
-    constructor(filePath) {
-        this.path = filePath;
-    }
-
     async getAll() {
         try {
-            const data = await fs.readFile(this.path, 'utf-8');
-            return JSON.parse(data);
+            return await ServiceModel.find();
         } catch (error) {
-            return [];
+            throw new Error(`Error al obtener los servicios: ${error.message}`);
         }
     }
 
     async getById(id) {
-        const services = await this.getAll();
-        return services.find(service => service.id === Number(id)) || null;
+        try {
+            return await ServiceModel.findById(id);
+        } catch (error) {
+            return null; // Si el ID no es un ObjectId válido de Mongoose o no existe
+        }
     }
 
     async create(service) {
-        const services = await this.getAll();
-
-        services.push(service);
-
-        await fs.writeFile(
-            this.path,
-            JSON.stringify(services, null, 2)
-        );
-
-        return service;
+        try {
+            return await ServiceModel.create(service);
+        } catch (error) {
+            throw new Error(`Error al crear el servicio: ${error.message}`);
+        }
     }
 
     async update(id, updatedService) {
-        const services = await this.getAll();
-
-        const index = services.findIndex(
-            service => service.id === Number(id)
-        );
-
-        if (index === -1) {
+        try {
+            return await ServiceModel.findByIdAndUpdate(
+                id,
+                updatedService,
+                { new: true, runValidators: true }
+            );
+        } catch (error) {
             return null;
         }
-
-        services[index] = updatedService;
-
-        await fs.writeFile(
-            this.path,
-            JSON.stringify(services, null, 2)
-        );
-
-        return updatedService;
     }
 
     async delete(id) {
-        const services = await this.getAll();
-
-        const index = services.findIndex(
-            service => service.id === Number(id)
-        );
-
-        if (index === -1) {
+        try {
+            return await ServiceModel.findByIdAndDelete(id);
+        } catch (error) {
             return null;
         }
-
-        const deleted = services.splice(index, 1);
-
-        await fs.writeFile(
-            this.path,
-            JSON.stringify(services, null, 2)
-        );
-
-        return deleted[0];
     }
 
 }

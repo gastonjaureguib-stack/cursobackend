@@ -7,9 +7,7 @@ const servicesRepository = new ServicesRepository();
 export class BookingsService {
 
     async createBooking(bookingData) {
-        
         const newBooking = {
-            id: Date.now(),
             ...bookingData,
             services: bookingData.services || []
         };
@@ -22,35 +20,37 @@ export class BookingsService {
     }
 
     async addServiceToBooking(bid, sid) {
-        
-        // Validación de reserva
+
         const booking = await bookingsRepository.getById(bid);
+
         if (!booking) {
             throw new Error('Reserva no encontrada');
         }
 
-        // Validación de servicio
         const service = await servicesRepository.getById(sid);
+
         if (!service) {
             throw new Error('Servicio no encontrado');
         }
 
-        // Actualización de cantidades o inserción
-        const serviceIndex = booking.services.findIndex(
-            s => s.service === Number(sid)
+        const bookingObj = booking.toObject ? booking.toObject() : booking;
+
+        const serviceIndex = bookingObj.services.findIndex(
+            s => s.service.toString() === sid.toString()
         );
 
         if (serviceIndex !== -1) {
-            booking.services[serviceIndex].quantity += 1;
+            bookingObj.services[serviceIndex].quantity += 1;
         } else {
-            booking.services.push({
-                service: Number(sid),
+            bookingObj.services.push({
+                service: sid,
                 quantity: 1
             });
         }
 
-        // Persistencia
-        return await bookingsRepository.update(bid, booking);
+        return await bookingsRepository.update(bid, {
+            services: bookingObj.services
+        });
     }
 
 }

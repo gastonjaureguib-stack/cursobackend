@@ -5,7 +5,7 @@ const service = new ServicesService();
 export const getServices = async (req, res) => {
     try {
 
-        const { category, available } = req.query;
+        const { category, available, price } = req.query;
 
         let services = await service.getServices();
 
@@ -17,6 +17,11 @@ export const getServices = async (req, res) => {
             services = services.filter(
                 s => s.available === (available === 'true')
             );
+        }
+
+        if (price !== undefined) {
+            const numericPrice = Number(price);
+            services = services.filter(s => s.price === numericPrice);
         }
 
         res.status(200).json({

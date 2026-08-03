@@ -1,6 +1,6 @@
 import { BookingsDAO } from '../dao/bookings.dao.js';
 
-const dao = new BookingsDAO('./src/data/bookings.json');
+const dao = new BookingsDAO();
 
 export class BookingsRepository {
 
