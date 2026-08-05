@@ -1,8 +1,8 @@
-Markdown# Sistema Backend de Servicios y Reservas
+# Sistema Backend de Servicios y Reservas para Agencia de Viajes
 
-API REST desarrollada con **Node.js**, **Express** y **MongoDB (Mongoose)**, que permite administrar servicios turísticos y reservas.
+API REST desarrollada con **Node.js**, **Express** y **MongoDB (Mongoose)** para administrar servicios turísticos, reservas y mensajes de clientes.
 
-La aplicación implementa una **arquitectura en capas** (Router → Controller → Service → Repository → DAO), facilitando el mantenimiento del código, la escalabilidad y una separación limpia de responsabilidades.
+La aplicación implementa una **arquitectura en capas** (Router → Controller → Service → Repository → DAO → Model), incorpora **vistas renderizadas del lado del servidor con Handlebars** y **comunicación en tiempo real mediante Socket.io**, manteniendo la API REST completamente funcional.
 
 ---
 
@@ -10,7 +10,10 @@ La aplicación implementa una **arquitectura en capas** (Router → Controller �
 
 - Node.js
 - Express
-- MongoDB & Mongoose
+- MongoDB
+- Mongoose
+- Express Handlebars
+- Socket.io
 - dotenv
 
 ---
@@ -20,16 +23,63 @@ La aplicación implementa una **arquitectura en capas** (Router → Controller �
 ## 1. Clonar el repositorio
 
 ```bash
-git clone [https://github.com/usuario/repositorio.git](https://github.com/usuario/repositorio.git)
-2. Ingresar al proyectoBashcd cursoback
-3. Instalar dependenciasBashnpm install
-4. Crear el archivo .envTomar como referencia el archivo .env.example y completar con tus credenciales de MongoDB Atlas o local.Ejemplo:Fragmento de códigoPORT=8080
+git clone https://github.com/usuario/repositorio.git
+```
+
+## 2. Ingresar al proyecto
+
+```bash
+cd cursoback
+```
+
+## 3. Instalar dependencias
+
+```bash
+npm install
+```
+
+## 4. Crear el archivo `.env`
+
+Tomar como referencia el archivo `.env.example` y completar las variables de entorno.
+
+Ejemplo:
+
+```env
+PORT=8080
 NODE_ENV=development
-MONGO_URI=mongodb+srv://tu_usuario:tu_password@cluster.xxxxx.mongodb.net/tu_base_de_datos?retryWrites=true&w=majority
-EjecuciónModo desarrolloBashnpm run dev
-Modo producciónBashnpm start
-El servidor se ejecutará por defecto en:http://localhost:8080
-Arquitectura del proyectoLa aplicación fue diseñada siguiendo una arquitectura en capas, donde cada una posee una responsabilidad específica.Router
+MONGO_URI=mongodb://localhost:27017/tu_base_de_datos
+```
+
+---
+
+# Scripts disponibles
+
+## Modo desarrollo
+
+```bash
+npm run dev
+```
+
+## Modo producción
+
+```bash
+npm start
+```
+
+El servidor se ejecutará por defecto en:
+
+```
+http://localhost:8080
+```
+
+---
+
+# Arquitectura del proyecto
+
+La aplicación fue diseñada siguiendo una arquitectura en capas para separar responsabilidades y facilitar el mantenimiento del código.
+
+```
+Router
    │
    ▼
 Controller
@@ -44,54 +94,186 @@ Repository
 DAO
    │
    ▼
-MongoDB (Mongoose)
+Model (Mongoose)
+   │
+   ▼
+MongoDB
+```
 
-Responsabilidad de cada capaCapaResponsabilidadRouterDefine los endpoints y delega el procesamiento al Controller.ControllerRecibe las solicitudes HTTP, obtiene los datos del req, invoca al Service y devuelve la respuesta (res).
+## Responsabilidad de cada capa
 
-ServiceContiene toda la lógica de negocio y las validaciones de la aplicación.RepositoryActúa como intermediario entre el Service y el DAO.DAOSe encarga exclusivamente de interactuar con la base de datos utilizando modelos de Mongoose.Estructura del proyectosrc/
+| Capa | Responsabilidad |
+|------|-----------------|
+| Router | Define los endpoints y deriva las solicitudes al Controller. |
+| Controller | Recibe la petición HTTP, obtiene la información del request y responde al cliente. |
+| Service | Contiene la lógica de negocio y las validaciones. |
+| Repository | Actúa como intermediario entre Service y DAO. |
+| DAO | Gestiona el acceso a la base de datos mediante Mongoose. |
+| Model | Define los esquemas y modelos de MongoDB. |
+
+---
+
+# Estructura del proyecto
+
+```
+src/
 │
 ├── app.js
 ├── server.js
 │
 ├── config/
-│   ├── env.config.js
-│   └── database.config.js
+│   ├── database.config.js
+│   └── env.config.js
 │
 ├── controllers/
+│   ├── bookings.controller.js
+│   ├── messages.controller.js
 │   ├── services.controller.js
-│   └── bookings.controller.js
+│   └── views.controller.js
 │
 ├── services/
-│   ├── services.service.js
-│   └── bookings.service.js
+│   ├── bookings.service.js
+│   ├── messages.service.js
+│   └── services.service.js
 │
 ├── repositories/
-│   ├── services.repository.js
-│   └── bookings.repository.js
+│   ├── bookings.repository.js
+│   ├── messages.repository.js
+│   └── services.repository.js
 │
 ├── dao/
-│   ├── services.dao.js
-│   └── bookings.dao.js
+│   ├── bookings.dao.js
+│   ├── messages.dao.js
+│   └── services.dao.js
 │
 ├── models/
-│   ├── service.model.js
-│   └── booking.model.js
+│   ├── booking.model.js
+│   ├── message.model.js
+│   └── service.model.js
 │
-└── routes/
-    ├── services.router.js
-    └── bookings.router.js
+├── routes/
+│   ├── bookings.router.js
+│   ├── messages.router.js
+│   ├── services.router.js
+│   └── views.router.js
+│
+└── views/
+    ├── layouts/
+    │   └── main.handlebars
+    ├── availability.handlebars
+    └── services.handlebars
 
-PersistenciaLa aplicación utiliza MongoDB gestionado a través de Mongoose, reemplazando el sistema anterior de archivos JSON. Las conexiones se manejan de forma segura mediante esquemas y validaciones nativas de la base de datos
+public/
+│
+├── css/
+│   └── styles.css
+│
+└── js/
+    └── socket.js
+```
 
-Recurso: ServicesEstructura (Modelo Mongoose)JSON{
-  "name": "Tour de Montaña",
-  "description": "Excursión guiada",
-  "duration": 4,
+---
+
+# Persistencia
+
+La aplicación utiliza **MongoDB** administrado mediante **Mongoose**, reemplazando la persistencia basada en archivos.
+
+Todas las operaciones sobre la base de datos se realizan respetando la arquitectura en capas.
+
+---
+
+# Vistas con Handlebars
+
+La aplicación incorpora vistas renderizadas desde el servidor utilizando **Express Handlebars**.
+
+## Servicios
+
+```
+GET /views/services
+```
+
+Renderiza el listado completo de servicios almacenados en MongoDB mostrando:
+
+- Nombre
+- Descripción
+- Duración
+- Precio
+- Categoría
+- Disponibilidad
+
+---
+
+## Disponibilidad / Reservas
+
+```
+GET /views/availability
+```
+
+Renderiza las reservas existentes utilizando datos reales obtenidos desde la base de datos.
+
+---
+
+# Comunicación en tiempo real (Socket.io)
+
+La aplicación incorpora **Socket.io** para actualizar automáticamente la vista de servicios.
+
+Cuando un servicio es:
+
+- creado
+- actualizado
+- eliminado
+
+el servidor emite un evento que actualiza el listado de servicios en el navegador sin necesidad de recargar la página.
+
+---
+
+# Recurso: Services
+
+## Modelo
+
+```json
+{
+  "name": "City Tour Montevideo",
+  "description": "Recorrido guiado por la ciudad",
+  "duration": 180,
   "price": 50,
-  "category": "Aventura",
+  "category": "Excursiones",
   "available": true
 }
-EndpointsMétodoEndpointDescripciónGET/api/servicesObtener todos los servicios (soporta filtros por query params: category, available, price)GET/api/services/:sidObtener un servicio por IDGET/api/services/getById/:sidObtener un servicio por ID (Ruta de compatibilidad)POST/api/servicesCrear un nuevo servicioPUT/api/services/:sidActualizar un servicioDELETE/api/services/:sidEliminar un servicioRecurso: BookingsEstructura (Modelo Mongoose)JSON{
+```
+
+## Endpoints
+
+| Método | Endpoint | Descripción |
+|---------|----------|-------------|
+| GET | /api/services | Obtener todos los servicios |
+| GET | /api/services/:sid | Obtener servicio por ID |
+| POST | /api/services | Crear servicio |
+| PUT | /api/services/:sid | Actualizar servicio |
+| DELETE | /api/services/:sid | Eliminar servicio |
+
+### Filtros disponibles
+
+```
+GET /api/services?category=Excursiones
+```
+
+```
+GET /api/services?available=true
+```
+
+```
+GET /api/services?price=50
+```
+
+---
+
+# Recurso: Bookings
+
+## Modelo
+
+```json
+{
   "client": "Juan Pérez",
   "clientEmail": "juan@mail.com",
   "date": "2026-07-20",
@@ -104,14 +286,78 @@ EndpointsMétodoEndpointDescripciónGET/api/servicesObtener todos los servicios 
     }
   ]
 }
+```
 
-EndpointsMétodoEndpointDescripciónPOST/api/bookingsCrear una reservaGET/api/bookings/:bidObtener una reserva por ID (incluye .populate() de los servicios)POST/api/bookings/:bid/services/:sidAgregar un servicio a una reserva
-Regla de negocio implementadaLa lógica principal del sistema se encuentra en la capa Service.Cuando un servicio se agrega a una reserva:Si el servicio no existe en la reserva, se agrega con quantity: 1.Si el servicio ya existe, no se crea un nuevo registro, sino que se incrementa automáticamente la propiedad quantity.Esta regla de negocio se implementa en bookings.service.js, respetando la arquitectura en capas.Scripts disponiblesEjecutar en modo desarrollo:Bashnpm run dev
-Ejecutar normalmente:Bashnpm start
-Dependencias
-express
-mongoose
-dotenv
+## Endpoints
 
+| Método | Endpoint | Descripción |
+|---------|----------|-------------|
+| POST | /api/bookings | Crear reserva |
+| GET | /api/bookings/:bid | Obtener reserva por ID |
+| POST | /api/bookings/:bid/services/:sid | Agregar un servicio a la reserva |
 
-AutorGastón JaureguiberryProyecto desarrollado como entrega del curso Backend con Node.js y Express de Coderhouse, implementando una API REST con arquitectura en capas, patrón Repository, patrón DAO y persistencia mediante MongoDB y Mongoose.
+---
+
+# Recurso: Messages
+
+## Modelo
+
+```json
+{
+  "user": "Juan Pérez",
+  "message": "Quisiera información sobre las excursiones.",
+  "timestamp": "2025-08-05T15:30:00.000Z"
+}
+```
+
+## Endpoints
+
+| Método | Endpoint | Descripción |
+|---------|----------|-------------|
+| GET | /api/messages | Obtener todos los mensajes |
+| POST | /api/messages | Crear un nuevo mensaje |
+
+---
+
+# Regla de negocio implementada
+
+La lógica principal se encuentra en la capa **Service**.
+
+Cuando se agrega un servicio a una reserva:
+
+- Si el servicio no existe, se agrega con `quantity: 1`.
+- Si el servicio ya existe, se incrementa automáticamente la cantidad sin duplicar el registro.
+
+Esta lógica se implementa respetando la arquitectura en capas.
+
+---
+
+# Funcionalidades implementadas
+
+- API REST completa.
+- Arquitectura en capas.
+- Patrón Repository.
+- Patrón DAO.
+- Persistencia con MongoDB.
+- Validaciones de negocio en la capa Service.
+- Vistas renderizadas con Handlebars.
+- Actualización en tiempo real mediante Socket.io.
+- Separación entre API REST y vistas server-side.
+
+---
+
+# Dependencias principales
+
+- express
+- mongoose
+- express-handlebars
+- socket.io
+- dotenv
+
+---
+
+# Autor
+
+**Gastón Jaureguiberry**
+
+Proyecto desarrollado como entrega del curso **Backend I** de **Coderhouse**, implementando una API REST con Node.js, Express y MongoDB, utilizando arquitectura en capas, patrón Repository, patrón DAO, vistas server-side con Handlebars y comunicación en tiempo real mediante Socket.io.

@@ -1,0 +1,17 @@
+<section>
+    <h1>Disponibilidad y Reservas</h1>
+    <div id="bookings-container">
+        {{#if bookings.length}}
+            <ul>
+                {{#each bookings}}
+                    <li>
+                        <h3>Reserva #{{this._id}}</h3>
+                        <p><strong>Estado:</strong> {{this.status}}</p>
+                    </li>
+                {{/each}}
+            </ul>
+        {{else}}
+            <p>No hay reservas cargadas actualmente.</p>
+        {{/if}}
+    </div>
+</section>

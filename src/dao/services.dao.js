@@ -14,7 +14,7 @@ export class ServicesDAO {
         try {
             return await ServiceModel.findById(id);
         } catch (error) {
-            return null; // Si el ID no es un ObjectId válido de Mongoose o no existe
+            return null; 
         }
     }
 

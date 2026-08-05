@@ -11,15 +11,10 @@ import {
 const router = Router();
 
 router.get('/', getServices);
-
-
 router.get('/:sid', getServiceById);
 router.get('/getById/:sid', getServiceById);
-
 router.post('/', createService);
-
 router.put('/:sid', updateService);
-
 router.delete('/:sid', deleteService);
 
 export default router;

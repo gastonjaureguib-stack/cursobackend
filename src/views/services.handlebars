@@ -1,0 +1,43 @@
+<section>
+    <h1>Listado de Servicios</h1>
+
+    <div id="services-container">
+        {{#if services.length}}
+            <ul id="services-list">
+                {{#each services}}
+                    <li>
+                        <h3>{{this.name}}</h3>
+
+                        <p>{{this.description}}</p>
+
+                        <p>
+                            <strong>Duración:</strong>
+                            {{this.duration}} mins
+                        </p>
+
+                        <p>
+                            <strong>Precio:</strong>
+                            ${{this.price}}
+                        </p>
+
+                        <p>
+                            <strong>Categoría:</strong>
+                            {{this.category}}
+                        </p>
+
+                        <p>
+                            <strong>Disponibilidad:</strong>
+                            {{#if this.available}}
+                                Disponible
+                            {{else}}
+                                No disponible
+                            {{/if}}
+                        </p>
+                    </li>
+                {{/each}}
+            </ul>
+        {{else}}
+            <p>No hay servicios cargados actualmente.</p>
+        {{/if}}
+    </div>
+</section>

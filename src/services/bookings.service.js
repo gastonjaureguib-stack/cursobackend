@@ -6,17 +6,21 @@ const servicesRepository = new ServicesRepository();
 
 export class BookingsService {
 
+    async getBookings() {
+        return bookingsRepository.getAll();
+    }
+
     async createBooking(bookingData) {
         const newBooking = {
             ...bookingData,
             services: bookingData.services || []
         };
 
-        return await bookingsRepository.create(newBooking);
+        return bookingsRepository.create(newBooking);
     }
 
     async getBookingById(id) {
-        return await bookingsRepository.getById(id);
+        return bookingsRepository.getById(id);
     }
 
     async addServiceToBooking(bid, sid) {
@@ -48,7 +52,7 @@ export class BookingsService {
             });
         }
 
-        return await bookingsRepository.update(bid, {
+        return bookingsRepository.update(bid, {
             services: bookingObj.services
         });
     }

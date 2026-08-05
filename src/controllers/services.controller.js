@@ -4,7 +4,6 @@ const service = new ServicesService();
 
 export const getServices = async (req, res) => {
     try {
-
         const { category, available, price } = req.query;
 
         let services = await service.getServices();
@@ -30,19 +29,15 @@ export const getServices = async (req, res) => {
         });
 
     } catch (error) {
-
         res.status(500).json({
             status: 'error',
             message: error.message
         });
-
     }
 };
 
 export const getServiceById = async (req, res) => {
-
     try {
-
         const foundService = await service.getServiceById(req.params.sid);
 
         if (!foundService) {
@@ -58,21 +53,22 @@ export const getServiceById = async (req, res) => {
         });
 
     } catch (error) {
-
         res.status(500).json({
             status: 'error',
             message: error.message
         });
-
     }
-
 };
 
 export const createService = async (req, res) => {
-
     try {
-
         const newService = await service.createService(req.body);
+
+        
+        const io = req.app.get('socketio');
+        if (io) {
+            io.emit('update_services', await service.getServices());
+        }
 
         res.status(201).json({
             status: 'success',
@@ -80,20 +76,15 @@ export const createService = async (req, res) => {
         });
 
     } catch (error) {
-
         res.status(400).json({
             status: 'error',
             message: error.message
         });
-
     }
-
 };
 
 export const updateService = async (req, res) => {
-
     try {
-
         const { id, ...updatedData } = req.body;
 
         const updatedService = await service.updateService(
@@ -102,12 +93,16 @@ export const updateService = async (req, res) => {
         );
 
         if (!updatedService) {
-
             return res.status(404).json({
                 status: 'error',
                 message: 'Servicio no encontrado'
             });
+        }
 
+        
+        const io = req.app.get('socketio');
+        if (io) {
+            io.emit('update_services', await service.getServices());
         }
 
         res.status(200).json({
@@ -116,29 +111,28 @@ export const updateService = async (req, res) => {
         });
 
     } catch (error) {
-
         res.status(500).json({
             status: 'error',
             message: error.message
         });
-
     }
-
 };
 
 export const deleteService = async (req, res) => {
-
     try {
-
         const deletedService = await service.deleteService(req.params.sid);
 
         if (!deletedService) {
-
             return res.status(404).json({
                 status: 'error',
                 message: 'Servicio no encontrado'
             });
+        }
 
+       
+        const io = req.app.get('socketio');
+        if (io) {
+            io.emit('update_services', await service.getServices());
         }
 
         res.status(200).json({
@@ -147,12 +141,9 @@ export const deleteService = async (req, res) => {
         });
 
     } catch (error) {
-
         res.status(500).json({
             status: 'error',
             message: error.message
         });
-
     }
-
 };
