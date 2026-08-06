@@ -27,7 +27,7 @@ socket.on('update_services', (services) => {
 
             <p>
                 <strong>Disponibilidad:</strong>
-                ${service.available ? 'Disponible' : 'No disponible'}
+                ${service.available? 'Disponible' : 'No disponible'}
             </p>
         `;
 
