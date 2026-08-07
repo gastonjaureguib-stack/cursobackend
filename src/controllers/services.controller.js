@@ -4,28 +4,30 @@ const service = new ServicesService();
 
 export const getServices = async (req, res) => {
     try {
-        const { category, available, price } = req.query;
+        const { category, available, page, limit, sortBy, order } = req.query;
 
-        let services = await service.getServices();
+        // Pasamos todos los query params a la capa de servicio/DAO
+        const result = await service.getServices({
+            category,
+            available,
+            page,
+            limit,
+            sortBy,
+            order
+        });
 
-        if (category) {
-            services = services.filter(s => s.category === category);
-        }
-
-        if (available !== undefined) {
-            services = services.filter(
-                s => s.available === (available === 'true')
-            );
-        }
-
-        if (price !== undefined) {
-            const numericPrice = Number(price);
-            services = services.filter(s => s.price === numericPrice);
-        }
-
+        // Devolvemos exactamente la estructura de metadatos requerida
         res.status(200).json({
             status: 'success',
-            payload: services
+            payload: result.payload,
+            totalDocs: result.totalDocs,
+            limit: result.limit,
+            totalPages: result.totalPages,
+            page: result.page,
+            hasPrevPage: result.hasPrevPage,
+            hasNextPage: result.hasNextPage,
+            prevPage: result.prevPage,
+            nextPage: result.nextPage
         });
 
     } catch (error) {
@@ -64,10 +66,9 @@ export const createService = async (req, res) => {
     try {
         const newService = await service.createService(req.body);
 
-        
         const io = req.app.get('socketio');
         if (io) {
-            io.emit('update_services', await service.getServices());
+            io.emit('update_services', await service.getServices({}));
         }
 
         res.status(201).json({
@@ -99,10 +100,9 @@ export const updateService = async (req, res) => {
             });
         }
 
-        
         const io = req.app.get('socketio');
         if (io) {
-            io.emit('update_services', await service.getServices());
+            io.emit('update_services', await service.getServices({}));
         }
 
         res.status(200).json({
@@ -129,10 +129,9 @@ export const deleteService = async (req, res) => {
             });
         }
 
-       
         const io = req.app.get('socketio');
         if (io) {
-            io.emit('update_services', await service.getServices());
+            io.emit('update_services', await service.getServices({}));
         }
 
         res.status(200).json({

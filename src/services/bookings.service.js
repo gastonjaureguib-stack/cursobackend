@@ -6,8 +6,8 @@ const servicesRepository = new ServicesRepository();
 
 export class BookingsService {
 
-    async getBookings() {
-        return bookingsRepository.getAll();
+    async getAllBookings() {
+        return await bookingsRepository.getAll();
     }
 
     async createBooking(bookingData) {
@@ -16,15 +16,14 @@ export class BookingsService {
             services: bookingData.services || []
         };
 
-        return bookingsRepository.create(newBooking);
+        return await bookingsRepository.create(newBooking);
     }
 
     async getBookingById(id) {
-        return bookingsRepository.getById(id);
+        return await bookingsRepository.getById(id);
     }
 
     async addServiceToBooking(bid, sid) {
-
         const booking = await bookingsRepository.getById(bid);
 
         if (!booking) {
@@ -39,22 +38,28 @@ export class BookingsService {
 
         const bookingObj = booking.toObject ? booking.toObject() : booking;
 
-        const serviceIndex = bookingObj.services.findIndex(
-            s => s.service.toString() === sid.toString()
+        // Mapeamos los servicios extrayendo únicamente el ID en caso de venir poblados (.populate)
+        const services = (bookingObj.services || []).map(s => {
+            const serviceId = s.service?._id ? s.service._id.toString() : s.service?.toString();
+            return {
+                service: serviceId,
+                quantity: s.quantity || 1
+            };
+        });
+
+        const serviceIndex = services.findIndex(
+            s => s.service === sid.toString()
         );
 
         if (serviceIndex !== -1) {
-            bookingObj.services[serviceIndex].quantity += 1;
+            services[serviceIndex].quantity += 1;
         } else {
-            bookingObj.services.push({
+            services.push({
                 service: sid,
                 quantity: 1
             });
         }
 
-        return bookingsRepository.update(bid, {
-            services: bookingObj.services
-        });
+        return await bookingsRepository.update(bid, { services });
     }
-
 }

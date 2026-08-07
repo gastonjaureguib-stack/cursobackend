@@ -2,28 +2,23 @@ import { BookingsService } from '../services/bookings.service.js';
 
 const service = new BookingsService();
 
-export const createBooking = async (req, res) => {
-    const {
-        client,
-        clientEmail,
-        date,
-        time,
-        status
-    } = req.body;
+export const getAllBookings = async (req, res) => {
+    try {
+        const bookings = await service.getAllBookings();
 
-    if (
-        !client ||
-        !clientEmail ||
-        !date ||
-        !time ||
-        !status
-    ) {
-        return res.status(400).json({
+        res.status(200).json({
+            status: 'success',
+            payload: bookings
+        });
+    } catch (error) {
+        res.status(500).json({
             status: 'error',
-            message: 'Todos los campos son obligatorios'
+            message: error.message
         });
     }
+};
 
+export const createBooking = async (req, res) => {
     try {
         const newBooking = await service.createBooking(req.body);
 
@@ -31,7 +26,6 @@ export const createBooking = async (req, res) => {
             status: 'success',
             payload: newBooking
         });
-
     } catch (error) {
         res.status(500).json({
             status: 'error',
@@ -55,7 +49,6 @@ export const getBookingById = async (req, res) => {
             status: 'success',
             payload: booking
         });
-
     } catch (error) {
         res.status(500).json({
             status: 'error',
@@ -71,6 +64,13 @@ export const addServiceToBooking = async (req, res) => {
             req.params.sid
         );
 
+        if (!updatedBooking) {
+            return res.status(404).json({
+                status: 'error',
+                message: 'Reserva o servicio no encontrado'
+            });
+        }
+
         res.status(200).json({
             status: 'success',
             payload: updatedBooking
@@ -83,7 +83,7 @@ export const addServiceToBooking = async (req, res) => {
         ) {
             return res.status(404).json({
                 status: 'error',
-                message: 'Reserva no encontrada'
+                message: error.message
             });
         }
 

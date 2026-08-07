@@ -4,8 +4,8 @@ const dao = new ServicesDAO();
 
 export class ServicesRepository {
 
-    async getAll() {
-        return await dao.getAll();
+    async getAll(queryParams) {
+        return await dao.getAll(queryParams);
     }
 
     async getById(id) {
